@@ -218,7 +218,11 @@ func (oai *OpenApiV3) structToSchema(object any) (*Schema, error) {
 
 				if strings.HasPrefix(rule, validationRuleKeyForMaxLength) {
 					maxlength := gconv.Uint64(rule[11:])
-					ref.Value.MaxLength = &maxlength
+					if ref.Value.Type == TypeArray {
+						ref.Value.MaxItems = &maxlength
+					} else {
+						ref.Value.MaxLength = &maxlength
+					}
 				}
 
 				if strings.HasPrefix(rule, validationRuleKeyForMin) {
@@ -230,16 +234,25 @@ func (oai *OpenApiV3) structToSchema(object any) (*Schema, error) {
 
 				if strings.HasPrefix(rule, validationRuleKeyForMinLength) {
 					minlength := gconv.Uint64(rule[11:])
-					ref.Value.MinLength = minlength
+					if ref.Value.Type == TypeArray {
+						ref.Value.MinItems = minlength
+					} else {
+						ref.Value.MinLength = minlength
+					}
 				}
 
 				if strings.HasPrefix(rule, validationRuleKeyForLength) {
 					lengthRule := gstr.Split(rule[7:], ",")
 					if len(lengthRule) == 2 {
 						minlength := gconv.Uint64(lengthRule[0])
-						ref.Value.MinLength = minlength
 						maxlength := gconv.Uint64(lengthRule[1])
-						ref.Value.MaxLength = &maxlength
+						if ref.Value.Type == TypeArray {
+							ref.Value.MinItems = minlength
+							ref.Value.MaxItems = &maxlength
+						} else {
+							ref.Value.MinLength = minlength
+							ref.Value.MaxLength = &maxlength
+						}
 					}
 				}
 
